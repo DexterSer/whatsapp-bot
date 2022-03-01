@@ -11,7 +11,6 @@ const {
 const Language = require("../language")
 const Lang = Language.getString("updown")
 const { emoji, getImgUrl, isUrl } = require("../Utilis/Misc")
-const { audioCut } = require("../Utilis/fFmpeg")
 
 Asena.addCommand(
   { pattern: "whois ?(.*)", fromMe: true, desc: "Show Group or person info." },
@@ -94,25 +93,25 @@ Asena.addCommand(
     if (type == "video")
       return await message.sendMessage(
         buffer,
-        { filename: name, mimetype: mime },
+        { filename: name, mimetype: mime, quoted: message.quoted },
         MessageType.video
       )
     else if (type == "image")
       return await message.sendMessage(
         buffer,
-        { filename: name, mimetype: mime },
+        { filename: name, mimetype: mime, quoted: message.quoted },
         MessageType.image
       )
     else if (type == "audio")
       return await message.sendMessage(
         buffer,
-        { filename: name, mimetype: mime },
+        { filename: name, mimetype: mime, quoted: message.quoted },
         MessageType.audio
       )
     else
       return await message.sendMessage(
         buffer,
-        { filename: name, mimetype: mime },
+        { filename: name, mimetype: mime, quoted: message.quoted },
         MessageType.document
       )
   }
@@ -171,23 +170,18 @@ Asena.addCommand(
 Asena.addCommand(
   { pattern: "find", fromMe: true, desc: Lang.FIND_DESC },
   async (message, match) => {
-    if (
-      !message.reply_message ||
-      (!message.reply_message.audio && !message.reply_message.video)
+    if (!message.reply_message || !message.reply_message.audio)
+      return await message.sendMessage(`*Reply to a audio!*`)
+    const data = await IdentifySong(
+      await message.reply_message.downloadAndSaveMediaMessage("find")
     )
-      return await message.sendMessage(Lang.FIND_NEED_REPLY)
-    let location = await message.reply_message.downloadAndSaveMediaMessage(
-      "find"
-    )
-    let buff = await audioCut(location, 0, 15, "findo")
-    const data = await IdentifySong(buff)
     if (!data) return
     if (!data.status) return await message.sendMessage(Lang.NOT_FOUND)
     return await message.sendMessage(
       Lang.FIND_MSG.format(
         data.data.title,
-        data.data.artists,
-        data.data.genre,
+        data.data.artists || data.data.artist,
+        data.data.genre || data.data.label,
         data.data.album,
         data.data.release_date
       ),

@@ -63,7 +63,7 @@ Asena.addCommand(
       return await message.sendMessage(Lang.REPLY)
     return await message.sendMessage(
       await banner(
-        await message.reply_message.downloadMediaMessage(),
+        await message.reply_message.downloadAndSaveMediaMessage(),
         "wasted"
       ),
       {},
@@ -84,7 +84,7 @@ Asena.addCommand(
       return await message.sendMessage(Lang.REPLY)
     return await message.sendMessage(
       await banner(
-        await message.reply_message.downloadMediaMessage(),
+        await message.reply_message.downloadAndSaveMediaMessage(),
         "passed"
       ),
       {},
@@ -104,7 +104,10 @@ Asena.addCommand(
     if (!message.reply_message || !message.reply_message.image)
       return await message.sendMessage(Lang.REPLY)
     return await message.sendMessage(
-      await banner(await message.reply_message.downloadMediaMessage(), "jail"),
+      await banner(
+        await message.reply_message.downloadAndSaveMediaMessage(),
+        "jail"
+      ),
       {},
       MessageType.image
     )
@@ -123,7 +126,7 @@ Asena.addCommand(
       return await message.sendMessage(Lang.REPLY)
     return await message.sendMessage(
       await banner(
-        await message.reply_message.downloadMediaMessage(),
+        await message.reply_message.downloadAndSaveMediaMessage(),
         "triggered"
       ),
       { mimetype: Mimetype.webp },
@@ -139,9 +142,8 @@ Asena.addCommand(
     desc: Lang.READMORE_DESC,
   },
   async (message, match) => {
-    await message.sendMessage(
-      readMore(!message.reply_message ? match : message.reply_message.text)
-    )
+    if (match || message.reply_message.text)
+      await message.sendMessage(readMore(match || message.reply_message.text))
   }
 )
 
@@ -259,7 +261,8 @@ Asena.addCommand(
     desc: "Creates fancy text from given text",
   },
   async (message, match) => {
-    return await message.sendMessage("```" + stylishTextGen(match) + "```")
+    if (match)
+      return await message.sendMessage("```" + stylishTextGen(match) + "```")
   }
 )
 /*
